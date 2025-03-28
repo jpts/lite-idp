@@ -26,6 +26,7 @@ import (
 	"github.com/amdonov/lite-idp/saml"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 func (i *IDP) respond(authRequest *model.AuthnRequest, user *model.User,
@@ -47,6 +48,11 @@ func (i *IDP) respond(authRequest *model.AuthnRequest, user *model.User,
 		Secure:   true,
 		HttpOnly: true,
 	})
+
+	if authRequest.ProtocolBinding == "" {
+		authRequest.ProtocolBinding = viper.GetString("saml-default-response-protocol-binding")
+	}
+
 	switch authRequest.ProtocolBinding {
 	case "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact":
 		return i.sendArtifactResponse(authRequest, user, w, r)
