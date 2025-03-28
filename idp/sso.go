@@ -160,8 +160,12 @@ func (i *IDP) DefaultRedirectSSOHandler() http.HandlerFunc {
 				return err
 			}
 			relayState := r.Form.Get("RelayState")
-			if len(relayState) > 80 {
-				return errors.New("RelayState cannot be longer than 80 characters")
+
+			// Although the spec says the RelayState must not exceed 80, in practice
+			// implementations deviate from this.
+			// https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-saml-idp-things-to-know.html
+			if len(relayState) > 1024 {
+				return errors.New("RelayState cannot be longer than 1024 characters")
 			}
 
 			samlReq := r.Form.Get("SAMLRequest")
